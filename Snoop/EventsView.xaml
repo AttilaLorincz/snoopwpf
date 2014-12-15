@@ -285,7 +285,7 @@ All other rights reserved.
 		i:ComboBoxSettings.IsSnoopPart="True"
 		HorizontalAlignment="Stretch"
 		VerticalAlignment="Stretch"
-		Margin="0,0,20,0"
+		Margin="0,0,40,0"
 		Template="{StaticResource NoSelectionComboBox}"
 		ItemsSource="{Binding ElementName=Events, Path=AvailableEvents}"
 		IsSynchronizedWithCurrentItem="True"
@@ -294,7 +294,26 @@ All other rights reserved.
 			<TextBlock Style="{x:Null}" Text="Select which events you want to track."/>
 		</ComboBox.ToolTip>
 	</ComboBox>
-
+    <Button
+		Width="18"
+		Height="18"
+		HorizontalAlignment="Right"
+		Margin="0,0,21,0"
+		Padding="3"
+		Command="{x:Static my:EventsView.CopyToClipboardCommand}"
+	>
+        <Grid>
+            <Path
+				Stretch="Uniform"
+				Stroke="Black"
+				StrokeThickness="1"
+			    Data="M0,2 H5 V9 H0 V2 m3,0 V0 H8 V7 H5"
+			/>
+        </Grid>
+        <Button.ToolTip>
+            <TextBlock Style="{x:Null}" Text="Copy to clipboard."/>
+        </Button.ToolTip>
+    </Button>
 	<Button
 		Width="18"
 		Height="18"

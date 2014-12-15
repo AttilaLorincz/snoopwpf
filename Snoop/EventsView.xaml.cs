@@ -16,6 +16,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Controls;
 using Snoop.Infrastructure;
+using System.Text;
 
 namespace Snoop
 {
@@ -23,8 +24,10 @@ namespace Snoop
 	{
 		public static readonly RoutedCommand ClearCommand = new RoutedCommand();
 
+        public static readonly RoutedCommand CopyToClipboardCommand = new RoutedCommand();
 
-		public EventsView()
+
+        public EventsView()
 		{
 			this.InitializeComponent();
 
@@ -45,10 +48,12 @@ namespace Snoop
 				this.trackers.Add(tracker);
 
 			this.CommandBindings.Add(new CommandBinding(EventsView.ClearCommand, this.HandleClear));
-		}
+
+            this.CommandBindings.Add(new CommandBinding(EventsView.CopyToClipboardCommand, this.HandleCopyToClipboard));
+        }
 
 
-		public IEnumerable InterestingEvents
+        public IEnumerable InterestingEvents
 		{
 			get { return this.interestingEvents; }
 		}
@@ -108,7 +113,16 @@ namespace Snoop
 			this.interestingEvents.Clear();
 		}
 
-		private void EventTree_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        private void HandleCopyToClipboard(object sender, ExecutedRoutedEventArgs e)
+        {
+            var sb = new StringBuilder();
+            foreach (var evt in interestingEvents)
+                sb.AppendLine(evt.EventArgs.RoutedEvent.Name + " on " + evt.Originator + (evt.Handled ? " Handled by:" + evt.HandledBy.ToString() : ""));
+            var text = sb.ToString();
+            Clipboard.SetText(text);
+        }
+
+        private void EventTree_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
 		{
 			if (e.NewValue != null)
 			{
