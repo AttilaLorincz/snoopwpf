@@ -27,6 +27,7 @@ namespace Snoop
 	{
 		public static readonly RoutedCommand SnipXamlCommand = new RoutedCommand("SnipXaml", typeof(PropertyInspector));
 		public static readonly RoutedCommand PopTargetCommand = new RoutedCommand("PopTarget", typeof(PropertyInspector));
+		public static readonly RoutedCommand CopyToClipboardCommand = new RoutedCommand();
 		public static readonly RoutedCommand DelveCommand = new RoutedCommand();
 		public static readonly RoutedCommand DelveBindingCommand = new RoutedCommand();
 		public static readonly RoutedCommand DelveBindingExpressionCommand = new RoutedCommand();
@@ -34,7 +35,7 @@ namespace Snoop
 		public PropertyInspector()
 		{
 			propertyFilter.SelectedFilterSet = AllFilterSets[0];
-				
+
 			this.InitializeComponent();
 
 			this.inspector = this.PropertyGrid;
@@ -45,6 +46,7 @@ namespace Snoop
 			this.CommandBindings.Add(new CommandBinding(PropertyInspector.DelveCommand, this.HandleDelve, this.CanDelve));
 			this.CommandBindings.Add(new CommandBinding(PropertyInspector.DelveBindingCommand, this.HandleDelveBinding, this.CanDelveBinding));
 			this.CommandBindings.Add(new CommandBinding(PropertyInspector.DelveBindingExpressionCommand, this.HandleDelveBindingExpression, this.CanDelveBindingExpression));
+			this.CommandBindings.Add(new CommandBinding(EventsView.CopyToClipboardCommand, this.HandleCopyToClipboard, this.CanCopyToClipboard));
 
 			// watch for mouse "back" button
 			this.MouseDown += new MouseButtonEventHandler(MouseDownHandler);
@@ -258,6 +260,27 @@ namespace Snoop
 			return target;
 		}
 
+		private void HandleCopyToClipboard(object sender, ExecutedRoutedEventArgs e)
+		{
+			var sb = new StringBuilder();
+			foreach (var prop in PropertyGrid.Properties)
+			{
+				var value = prop.Value;
+				var type = prop.Property.PropertyType;
+				var line = String.Format("{0},{1},{2}", prop.Property.DisplayName, (value == null) ? "NULL" : value.ToString(), type.FullName);
+				sb.AppendLine(line);
+			}
+			var text = sb.ToString();
+			Clipboard.SetText(text, TextDataFormat.CommaSeparatedValue);
+		}
+
+		private void CanCopyToClipboard(object sender, CanExecuteRoutedEventArgs e)
+		{
+			if (e.Parameter != null)
+				e.CanExecute = true;
+			e.Handled = true;
+		}
+
 		private void HandleDelve(object sender, ExecutedRoutedEventArgs e)
 		{
 			var realTarget = GetRealTarget(((PropertyInformation)e.Parameter).Value);
@@ -365,10 +388,10 @@ namespace Snoop
 			set
 			{
 				propertyFilter.SelectedFilterSet = value;
-				OnPropertyChanged("SelectedFilterSet");
-				
-				if (value == null)
-					return;
+                OnPropertyChanged("SelectedFilterSet");
+
+                if (value == null)
+                    return;
 
 				if (value.IsEditCommand)
 				{
